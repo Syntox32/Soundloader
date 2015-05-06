@@ -20,20 +20,20 @@
 	                  [-f FOLDER] [-x]
 
 	arguments:
-		-h, --help            
+		-h, --help
 				Show this help message and exit
 
-		-l, --likes           
+		-l, --likes
 				Download the likes, requires a given username
 
-		-s, --set SET     
+		-s, --set SET
 				Link to a set to download
 
 		-t, --track TRACK
 				Link to a track to download
 
 		-u, --username USERNAME [required if '--likes' is used]
-				Used when retrieving likes, if the likes argument 
+				Used when retrieving likes, if the likes argument
 				is given this must also, else the script will throw an error.
 
 		-c, --count COUNT [optional]
@@ -41,7 +41,7 @@
 				given it will download all available
 
 		-f, --folder FOLDER [optional]
-				Where to download the track(s), if none is 
+				Where to download the track(s), if none is
 				given the directory will be the current directory
 
 		-x, --create-directory [optional]
@@ -60,7 +60,7 @@ from string import ascii_lowercase, ascii_uppercase
 class Soundloader(object):
 	def __init__(self, clientid=None, save_folder=None, create_folder=None):
 		"""
-		Initialize a soundloader class with a client ID or API key 
+		Initialize a soundloader class with a client ID or API key
 		"""
 		self.client_id = clientid
 
@@ -97,7 +97,7 @@ class Soundloader(object):
 			print("Are you sure this playlist is public?")
 			return False
 		set_len = len(data)
-		if count > 0: 
+		if count > 0:
 			set_len = count
 		for i in range(0, set_len):
 			track_id = data[i]["id"]
@@ -115,9 +115,11 @@ class Soundloader(object):
 			print("Could not retrieve data.")
 			return False
 		num_likes = len(likes)
-		if count > 0: 
+		if count > 0:
 			num_likes = count
 		for i in range(0, num_likes):
+			if likes[i]["track"] is None:
+				continue
 			track_id = likes[i]["track"]["id"]
 			fname = self._get_trackname(likes[i]["track"])
 			self._download_id(track_id, fname)
@@ -129,7 +131,7 @@ class Soundloader(object):
 		"""
 		resp = self._resolve("https://soundcloud.com/%s" % username)
 		return str(resp["id"])
-	
+
 	def _download_id(self, track_id, filename):
 		"""
 		Download and save a track by the given track ID and filename
@@ -154,8 +156,8 @@ class Soundloader(object):
 		"""
 		Return the list of likes for the given user ID
 		"""
-		j =  self._fetch_json(self.LIKES_URL % (str(user_id), str(limits), self.client_id))
-		if j is None: 
+		j =  self._fetch_json(self.LIKES_URL % (str(user_id), self.client_id, str(limits)))
+		if j is None:
 			return None
 		return j["collection"]
 
@@ -164,7 +166,7 @@ class Soundloader(object):
 		Return a list of all tracks in a set
 		"""
 		j = self._fetch_json(self.RESOLVE_URL % (str(set_url), self.client_id))
-		if j is None: 
+		if j is None:
 			return None
 		return j["tracks"]
 
@@ -174,7 +176,7 @@ class Soundloader(object):
 		"""
 		title = track_json["title"]
 		username = track_json["user"]["username"]
-		if "-" not in title: 
+		if "-" not in title:
 			title = username + " - " + title
 		return self._safe_filename(title)
 
@@ -185,7 +187,7 @@ class Soundloader(object):
 		try:
 			if self.save_folder:
 				filename = os.path.join(self.save_folder, filename)
-			with open(filename, "wb+") as f: 
+			with open(filename, "wb+") as f:
 				f.write(data)
 		except IOError as e:
 			print("IOError:", e)
@@ -202,21 +204,21 @@ class Soundloader(object):
 		Return a utf-8 encoded string
 		"""
 		return str(string).encode("utf-8")
-	
+
 	def _fetch_json(self, url):
 		"""
 		Return JSON data for a given URL
 		"""
 		try:
 			req = self._request(url)
-			if req is None: 
+			if req is None:
 				return None
 			data = req.read().decode("utf-8")
 			return json.loads(data)
 		except Exception as e:
 			print("Error:", e)
 		return None
-	
+
 	def _request(self, url):
 		"""
 		Return a request for a given URL, or print the appropriate error message
@@ -262,7 +264,7 @@ def main():
 	Take Soundcloud with you offline!
 	"""
 	apikey = "b45b1aa10f1ac2941910a7f0d10f8e28"
-	
+
 	if len(sys.argv) == 1:
 		track = input("Input a link to the track you wish to download:\n")
 		sl = Soundloader(apikey)
