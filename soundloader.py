@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+# -*- coding: utf-8 -*-
 """
 	Take Soundcloud with you offline!
 
@@ -47,15 +46,19 @@
 		-x, --create-directory [optional]
 				Create folder if none exists
 """
-
 import sys, os, os.path, argparse
 
 # https://code.google.com/p/stagger/
 # from stagger.id3 import *
 
 import json, re
-from urllib.request import urlopen
 from string import ascii_lowercase, ascii_uppercase
+
+PY3 = sys.version > '3'
+if PY3:
+	from urllib.request import urlopen
+else:
+	from urllib2 import urlopen
 
 class Soundloader(object):
 	def __init__(self, clientid=None, save_folder=None, create_folder=None):
@@ -73,6 +76,9 @@ class Soundloader(object):
 		self.LIKES_URL = "https://api-v2.soundcloud.com/users/%s/track_likes?client_id=%s&limit=%s"
 		self.SONG_URL = "https://api.soundcloud.com/i1/tracks/%s/streams?client_id=%s"
 		self.VALID_CHARS = ascii_lowercase + ascii_uppercase + "æøåÆØÅ" + " &_-0123456789()"
+
+		if not PY3:
+			self.VALID_CHARS = self.VALID_CHARS.decode("utf-8")
 
 	def download_track(self, song_url):
 		"""
@@ -270,7 +276,10 @@ def main():
 	apikey = "b45b1aa10f1ac2941910a7f0d10f8e28"
 
 	if len(sys.argv) == 1:
-		track = input("Input a link to the track you wish to download:\n")
+		if PY3: 
+			track = input("Input a link to the track you wish to download:\n")
+		else:
+			track = raw_input("Input a link to the track you wish to download:\n").decode("utf-8")
 		sl = Soundloader(apikey)
 		sl.download_track(track)
 		sys.exit(0)
