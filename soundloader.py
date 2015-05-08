@@ -143,14 +143,20 @@ class Soundloader(object):
 		Download and save a track by the given track ID and filename
 		"""
 		json = self._fetch_json(self.SONG_URL % (str(track_id), self.client_id))
+		 # 'name' is only used for printing to the console
+		 # the actual filename is used when saving
+		if PY3:
+			name = filename.encode("ascii", "ignore").decode("utf-8")
+		else:
+			name = filename.encode("ascii", "ignore")
 		if not "http_mp3_128_url" in json:
-			print("No http stream for track with ID: %s" % str(track_id))
+			print("No HTTP stream for track(%s): %s" % (str(track_id), name))
 			return False
 		dl_link = json["http_mp3_128_url"]
-		print("Downloading track id: %s" % str(track_id))
+		print("Downloading track: %s" % name)
 		track_data = self._request(dl_link).read()
 		if track_data is None:
-			print("Could not download track with ID: %s" % str(track_id))
+			print("Could not download track(%s): %s" % (str(track_id), name))
 			return False
 		self._save_track(filename, track_data)
 		print("Track download completed.")
