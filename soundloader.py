@@ -103,7 +103,7 @@ class Soundloader(object):
 			print("Are you sure this playlist is public?")
 			return False
 		set_len = len(data)
-		if count > 0:
+		if count > 0 and count <= len(data):
 			set_len = count
 		for i in range(0, set_len):
 			track_id = data[i]["id"]
@@ -121,7 +121,7 @@ class Soundloader(object):
 			print("Could not retrieve data.")
 			return False
 		num_likes = len(likes)
-		if count > 0:
+		if count > 0 and count <= len(likes):
 			num_likes = count
 		for i in range(0, num_likes):
 			if likes[i]["track"] is None:
