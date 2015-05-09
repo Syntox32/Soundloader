@@ -76,6 +76,8 @@ class Soundloader(object):
 		self.LIKES_URL = "https://api-v2.soundcloud.com/users/%s/track_likes?client_id=%s&limit=%s"
 		self.SONG_URL = "https://api.soundcloud.com/i1/tracks/%s/streams?client_id=%s"
 		self.VALID_CHARS = ascii_lowercase + ascii_uppercase + "æøåÆØÅ" + " &_-0123456789()"
+		self.ERR_HLS_STREAM = 0
+		self.ERR_FAILED = 0
 
 		if not PY3:
 			self.VALID_CHARS = self.VALID_CHARS.decode("utf-8")
@@ -120,6 +122,7 @@ class Soundloader(object):
 		if likes is None:
 			print("Could not retrieve data.")
 			return False
+		downloaded = 0
 		num_likes = len(likes)
 		if count > 0 and count <= len(likes):
 			num_likes = count
@@ -128,7 +131,10 @@ class Soundloader(object):
 				continue
 			track_id = likes[i]["track"]["id"]
 			fname = self._get_trackname(likes[i]["track"])
-			self._download_id(track_id, fname)
+			ret = self._download_id(track_id, fname)
+			if ret:
+				downloaded += 1
+		print("Successfully downloaded %s likes!" % str(downloaded))
 		return True
 
 	def get_user_id(self, username):
@@ -151,12 +157,15 @@ class Soundloader(object):
 			name = filename.encode("ascii", "ignore")
 		if not "http_mp3_128_url" in json:
 			print("No HTTP stream for track(%s): %s" % (str(track_id), name))
+			self.ERR_HLS_STREAM += 1
+			self.ERR_FAILED += 1
 			return False
 		dl_link = json["http_mp3_128_url"]
 		print("Downloading track: %s" % name)
 		track_data = self._request(dl_link).read()
 		if track_data is None:
 			print("Could not download track(%s): %s" % (str(track_id), name))
+			self.ERR_FAILED += 1
 			return False
 		self._save_track(filename, track_data)
 		print("Track download completed.")
@@ -312,22 +321,26 @@ def main():
 			sl.download_likes(args.username, args.count)
 		else:
 			sl.download_likes(args.username)
-		print("Done!")
 	elif args.set:
 		print("Downloading set..")
 		if args.count is not None:
 			sl.download_set(args.set, args.count)
 		else:
 			sl.download_set(args.set)
-		print("Done!")
 	elif args.track:
 		print("Downloading track '%s'" % args.track)
 		sl.download_track(args.track)
-		print("Done!")
 	else:
 		print("Well, you have to type in something!\n")
 		parser.print_help()
 		sys.exit(0)
+
+	if sl.ERR_FAILED != 0:
+		print("Finished with %s errors" % str(sl.ERR_FAILED))
+	if sl.ERR_HLS_STREAM != 0:
+		print("..of which %s was HLS streams" % str(sl.ERR_HLS_STREAM))
+
+	print("Done!")
 
 if __name__ == "__main__":
 	main()
