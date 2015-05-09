@@ -50,6 +50,9 @@ arguments:
 			
 	-x, --create-directory [optional]
 			Create folder if none exists
+	
+	--https [optional]
+			Use HTTPS when querying the API, slower than normal HTTP
 ```
 ## Requirements
 You need any version of <strong>Python 3</strong> running on your computer. It <em>should</em> also work with <strong>Python 2.7</strong>
