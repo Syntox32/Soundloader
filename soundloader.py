@@ -45,6 +45,9 @@
 
 		-x, --create-directory [optional]
 				Create folder if none exists
+
+		--https [optional]
+				Use HTTPS when querying the API, slower than normal HTTP
 """
 import sys, os, os.path, argparse
 
@@ -61,7 +64,7 @@ else:
 	from urllib2 import urlopen
 
 class Soundloader(object):
-	def __init__(self, clientid=None, save_folder=None, create_folder=None):
+	def __init__(self, clientid=None, save_folder=None, create_folder=None, https=None):
 		"""
 		Initialize a soundloader class with a client ID or API key
 		"""
@@ -72,9 +75,14 @@ class Soundloader(object):
 		else:
 			self.save_folder = None
 
-		self.RESOLVE_URL = "https://api.soundcloud.com/resolve.json?url=%s&client_id=%s"
-		self.LIKES_URL = "https://api-v2.soundcloud.com/users/%s/track_likes?client_id=%s&limit=%s"
-		self.SONG_URL = "https://api.soundcloud.com/i1/tracks/%s/streams?client_id=%s"
+		if https:
+			self._http_prefix = "https://"
+		else:
+			self._http_prefix = "http://" 
+
+		self.RESOLVE_URL = self._http_prefix + "api.soundcloud.com/resolve.json?url=%s&client_id=%s"
+		self.LIKES_URL = self._http_prefix + "api-v2.soundcloud.com/users/%s/track_likes?client_id=%s&limit=%s"
+		self.SONG_URL = self._http_prefix +"api.soundcloud.com/i1/tracks/%s/streams?client_id=%s"
 		self.VALID_CHARS = ascii_lowercase + ascii_uppercase + "æøåÆØÅ" + " &_-0123456789()"
 		self.ERR_HLS_STREAM = 0
 		self.ERR_FAILED = 0
@@ -141,7 +149,7 @@ class Soundloader(object):
 		"""
 		Return the user ID of a given username
 		"""
-		resp = self._resolve("https://soundcloud.com/%s" % username)
+		resp = self._resolve(self._http_prefix + "soundcloud.com/%s" % username)
 		return str(resp["id"])
 
 	def _download_id(self, track_id, filename):
@@ -307,9 +315,10 @@ def main():
 	parser.add_argument("-c", "--count", type=int, help="How many tracks are to be downloaded")
 	parser.add_argument("-f", "--folder", help="Where to download the track(s)")
 	parser.add_argument("-x", "--create-directory", action="store_true", help="Create folder if none exists")
+	parser.add_argument("--https", action="store_true", help="Use HTTPS when querying the API, slower than normal HTTP")
 	args = parser.parse_args()
 
-	sl = Soundloader(apikey, args.folder, args.create_directory)
+	sl = Soundloader(apikey, args.folder, args.create_directory, args.https)
 
 	if args.likes:
 		print("Downloading likes..")
