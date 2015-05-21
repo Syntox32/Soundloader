@@ -64,11 +64,16 @@ else:
 	from urllib2 import urlopen
 
 class Soundloader(object):
-	def __init__(self, clientid=None, save_folder=None, create_folder=None, https=None):
+	def __init__(self, clientid=None, save_folder=None, create_folder=None, https=None, overwrite=None):
 		"""
 		Initialize a soundloader class with a client ID or API key
 		"""
 		self.client_id = clientid
+
+		if overwrite:
+			self.overwrite = overwrite
+		else:
+			self.overwrite = False
 
 		if save_folder:
 			self.save_folder = self._get_download_folder(save_folder, create_folder)
@@ -163,6 +168,10 @@ class Soundloader(object):
 			name = filename.encode("ascii", "ignore").decode("utf-8")
 		else:
 			name = filename.encode("ascii", "ignore")
+		fname = os.path.join(self.save_folder, filename)
+		if os.path.isfile(fname) and not self.overwrite:
+			print("File already exist: %s" % name)
+			return True
 		if not "http_mp3_128_url" in json:
 			print("No HTTP stream for track(%s): %s" % (str(track_id), name))
 			self.ERR_HLS_STREAM += 1
@@ -315,10 +324,11 @@ def main():
 	parser.add_argument("-c", "--count", type=int, help="How many tracks are to be downloaded")
 	parser.add_argument("-f", "--folder", help="Where to download the track(s)")
 	parser.add_argument("-x", "--create-directory", action="store_true", help="Create folder if none exists")
+	parser.add_argument("-o", "--overwrite", action="store_true", help="Overwrite already existing songs")
 	parser.add_argument("--https", action="store_true", help="Use HTTPS when querying the API, slower than normal HTTP")
 	args = parser.parse_args()
 
-	sl = Soundloader(apikey, args.folder, args.create_directory, args.https)
+	sl = Soundloader(apikey, args.folder, args.create_directory, args.https, args.overwrite)
 
 	if args.likes:
 		print("Downloading likes..")
