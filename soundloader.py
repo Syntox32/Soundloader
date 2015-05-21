@@ -16,7 +16,7 @@
 		3. single track
 
 	usage: soundloader.py [-h] [-l] [-u USERNAME] [-s SET] [-t TRACK] [-c COUNT]
-	                  [-f FOLDER] [-x]
+                      [-f FOLDER] [-x] [-o] [--https]
 
 	arguments:
 		-h, --help
@@ -45,6 +45,9 @@
 
 		-x, --create-directory [optional]
 				Create folder if none exists
+
+		o, --overwrite [optional]
+				Overwrite already existing songs
 
 		--https [optional]
 				Use HTTPS when querying the API, slower than normal HTTP

@@ -17,8 +17,8 @@ If multiple actions are given it will be prioritized in this order:
   3.  single track    
 ```
 ```
-usage: soundloader.py [-h] [-l] [-u USERNAME] [-s SET] [-t TRACK] [-c COUNT]  
-                  [-f FOLDER] [-x]  
+usage: soundloader.py [-h] [-l] [-u USERNAME] [-s SET] [-t TRACK] [-c COUNT]
+				[-f FOLDER] [-x] [-o] [--https]
                   
 example: python soundloader.py -t https://soundcloud.com/<user>/<awesome track>
 ```
@@ -50,6 +50,9 @@ arguments:
 			
 	-x, --create-directory [optional]
 			Create folder if none exists
+
+	-o, --overwrite [optional]
+			Overwrite already existing songs
 	
 	--https [optional]
 			Use HTTPS when querying the API, slower than normal HTTP
