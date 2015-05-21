@@ -59,9 +59,9 @@ from string import ascii_lowercase, ascii_uppercase
 
 PY3 = sys.version > '3'
 if PY3:
-	from urllib.request import urlopen
+	from urllib.request import urlopen, HTTPError
 else:
-	from urllib2 import urlopen
+	from urllib2 import urlopen, HTTPError
 
 class Soundloader(object):
 	def __init__(self, clientid=None, save_folder=None, create_folder=None, https=None, overwrite=None):
@@ -168,9 +168,12 @@ class Soundloader(object):
 			name = filename.encode("ascii", "ignore").decode("utf-8")
 		else:
 			name = filename.encode("ascii", "ignore")
-		fname = os.path.join(self.save_folder, filename)
+		if self.save_folder:
+			fname = os.path.join(self.save_folder, filename)
+		else:
+			fname = filename
 		if os.path.isfile(fname) and not self.overwrite:
-			print("File already exist: %s" % name)
+			print("File already exist: %s\nSkipping!" % name)
 			return True
 		if not "http_mp3_128_url" in json:
 			print("No HTTP stream for track(%s): %s" % (str(track_id), name))
@@ -269,11 +272,12 @@ class Soundloader(object):
 		try:
 			req = urlopen(url)
 			return req
-		except Exception as e:
+		except HTTPError as e:
 			err = str(e)
-			if "404" in err: err = "[ERR 404]: I have no clue what you are trying to do.."
-			elif "401" in err: err = "[ERR 401]: You were not authorized, wtf."
-			elif ["502", "503"] in err: err = "[ERR 502/503]: It probably wasn't your fault, kid."
+			code = e.code
+			if code == 404: err = "[ERR 404]: I have no clue what you are trying to do.."
+			elif code == 401 in err: err = "[ERR 401]: You were not authorized, wtf."
+			elif code >= 500 and code < 600: err = "[ERR %s]: It probably wasn't your fault, kid." % str(code)
 		finally:
 			if err is not None:
 				print(err)
