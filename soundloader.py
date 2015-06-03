@@ -105,6 +105,7 @@ class Soundloader(object):
 		data = self._resolve(song_url)
 		if data is None or "id" not in data:
 			print("Could not retrieve track data.")
+			self.ERR_FAILED += 1
 			return False
 		track_id = data["id"]
 		fname = self._get_trackname(data)
@@ -129,7 +130,7 @@ class Soundloader(object):
 			self._download_id(track_id, fname)
 		return True
 
-	def download_likes(self, username, count=0):
+	def download_likes(self, username, count=10):
 		"""
 		Download n number of likes from a given username
 		"""
@@ -142,6 +143,7 @@ class Soundloader(object):
 		num_likes = len(likes)
 		if count > 0 and count <= len(likes):
 			num_likes = count
+		print("Preparing to download %s likes..." % str(num_likes))
 		for i in range(0, num_likes):
 			if likes[i]["track"] is None:
 				continue
@@ -362,7 +364,7 @@ def main():
 		sys.exit(0)
 
 	if sl.ERR_FAILED != 0:
-		print("Finished with %s errors" % str(sl.ERR_FAILED))
+		print("Finished with %s error(s)" % str(sl.ERR_FAILED))
 	if sl.ERR_HLS_STREAM != 0:
 		print("..of which %s was HLS streams" % str(sl.ERR_HLS_STREAM))
 
