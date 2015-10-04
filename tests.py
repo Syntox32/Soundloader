@@ -15,7 +15,7 @@ class TestSoundloaderClass(unittest.TestCase):
 		"""
 		I just need a comment here for consistency
 		"""
-		self.sl = Soundloader("b45b1aa10f1ac2941910a7f0d10f8e28", "tests/", True)
+		self.sl = Soundloader("02gUJC0hH2ct1EGOcYXQIzRFU91c72Ea", "tests/", True)
 
 	def test_resolve(self):
 		"""

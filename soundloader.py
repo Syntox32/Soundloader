@@ -314,7 +314,7 @@ def main():
 	"""
 	Take Soundcloud with you offline!
 	"""
-	apikey = "b45b1aa10f1ac2941910a7f0d10f8e28"
+	apikey = "02gUJC0hH2ct1EGOcYXQIzRFU91c72Ea"
 
 	if len(sys.argv) == 1:
 		if PY3: 
