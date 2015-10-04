@@ -52,13 +52,15 @@
 		--https [optional]
 				Use HTTPS when querying the API, slower than normal HTTP
 """
-import sys, os, os.path, argparse
-
-# https://code.google.com/p/stagger/
-# from stagger.id3 import *
-
-import json, re
+import sys, os, os.path, argparse, json, re
 from string import ascii_lowercase, ascii_uppercase
+
+#from stagger.id3 import *
+try:
+	import eyed3
+	ID3 = True
+except Exception, e:
+	ID3 = False
 
 PY3 = sys.version > '3'
 if PY3:
@@ -109,7 +111,7 @@ class Soundloader(object):
 			return False
 		track_id = data["id"]
 		fname = self._get_trackname(data)
-		self._download_id(track_id, fname)
+		self._download_id(track_id, fname, data)
 		return True
 
 	def download_set(self, set_url, count=0):
@@ -127,7 +129,7 @@ class Soundloader(object):
 		for i in range(0, set_len):
 			track_id = data[i]["id"]
 			fname = self._get_trackname(data[i])
-			self._download_id(track_id, fname)
+			self._download_id(track_id, fname, data[i])
 		return True
 
 	def download_likes(self, username, count=10):
@@ -149,7 +151,7 @@ class Soundloader(object):
 				continue
 			track_id = likes[i]["track"]["id"]
 			fname = self._get_trackname(likes[i]["track"])
-			ret = self._download_id(track_id, fname)
+			ret = self._download_id(track_id, fname, likes[i]["track"])
 			if ret:
 				downloaded += 1
 		print("Successfully downloaded %s likes!" % str(downloaded))
@@ -162,7 +164,7 @@ class Soundloader(object):
 		resp = self._resolve(self._http_prefix + "soundcloud.com/%s" % username)
 		return str(resp["id"])
 
-	def _download_id(self, track_id, filename):
+	def _download_id(self, track_id, filename, track_json):
 		"""
 		Download and save a track by the given track ID and filename
 		"""
@@ -193,7 +195,26 @@ class Soundloader(object):
 			self.ERR_FAILED += 1
 			return False
 		self._save_track(filename, track_data)
+		if ID3: 
+			self._set_id3_tags(filename, track_json)
 		print("Track download completed.")
+		return True
+
+	def _set_id3_tags(self, filename, track_json):
+		try:
+			f = eyed3.load(filename)
+			f.initTag()
+			if "-" not in track_json["title"]:
+				f.tag.title = track_json["title"].strip().encode("ascii", "ignore").decode("utf-8")
+				f.tag.artist = track_json["user"]["username"].strip().encode("ascii", "ignore").decode("utf-8")
+			else:
+				title = track_json["title"].split("-", 1)
+				f.tag.title = title[1].strip().encode("ascii", "ignore").decode("utf-8")
+				f.tag.artist = title[0].strip().encode("ascii", "ignore").decode("utf-8")
+			f.tag.save()
+		except IOError as e:
+			print("Could not set ID3 tag of file:\n  %s" % (os.path.basename(filename)))
+			return False
 		return True
 
 	def _resolve(self, url):
