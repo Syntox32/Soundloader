@@ -59,7 +59,7 @@ from string import ascii_lowercase, ascii_uppercase
 try:
 	import eyed3
 	ID3 = True
-except Exception, e:
+except Exception as e:
 	ID3 = False
 
 PY3 = sys.version > '3'
