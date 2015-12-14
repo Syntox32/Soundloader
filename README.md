@@ -1,4 +1,4 @@
-#Soundloader
+# Soundloader
 Download and take your favorite tracks with you, offline!
 
 If you enjoy the work of the artists you listen to, please go support them in a way that you feel
@@ -6,22 +6,70 @@ is appropriate(e.g. purchase it).
 
 Inspired by this <a href="https://github.com/013/Soundcloud-Downloader">repo</a>
 
-##How do I use it?
-If any number of arguments are given it will move on to the argument parser.
+## Installation
 
-If the script is ran without giving it any arguments, it will go CLI mode and ask you to input a link to a single track.
-````
-If multiple actions are given it will be prioritized in this order:
-  1.  likes  
-  2.  sets  
-  3.  single track    
+##### Option one (recommended)
+If you have pip working and installed, it's pretty straight forward.
+
 ```
+pip install git+https://github.com/Syntox32/Soundloader
+```
+
+##### Option two
+
+Download the project in some way (.zip or git), `cd` to the directory and run.
+
+```
+python setup.py install
+```
+---
+
+You can now run the script by typing this in the console of your choice.
+```
+soundloader.py
+```
+
+Run this for help.
+
+```
+soundloader.py --help
+```
+
+## Example usage
+
+Downloading 20 likes:
+
+```
+soundloader.py --likes --username <username> --count 20
+```
+---
+
+Downloading a single track:
+```
+soundloader.py --track https://soundcloud.com/<user>/<awesome_track>
+```
+---
+
+Downloading a track to a folder:
+```
+soundloader.py --folder C:\Music\Folder --track https://soundcloud.com/<user>/<awesome_track>
+```
+---
+
+Downloading a set of tracks, and create the download directory if it doesn't exist with `-x`
+```
+soundloader.py --folder C:\Music\Folder -x --set https://soundcloud.com/<username>/sets/<set_name>
+```
+
+## Arguments
+
+Starting the script without passing it any arguments, it will launch in an *interactive mode*.
+
 ```
 usage: soundloader.py [-h] [-l] [-u USERNAME] [-s SET] [-t TRACK] [-c COUNT]
 				[-f FOLDER] [-x] [-o] [--https]
-                  
-example: python soundloader.py -t https://soundcloud.com/<user>/<awesome track>
 ```
+
 ```
 arguments:
 	-h, --help            
@@ -57,5 +105,14 @@ arguments:
 	--https [optional]
 			Use HTTPS when querying the API, slower than normal HTTP
 ```
+
+If the script is ran without giving it any arguments, it will go CLI mode and ask you to input a link to a single track.
+````
+If multiple actions are given it will be prioritized in this order:
+  1.  likes  
+  2.  sets  
+  3.  single track    
+```
+
 ## Requirements
-You need any version of <strong>Python 3</strong> running on your computer. It <em>should</em> also work with <strong>Python 2.7</strong>
+You need any version of <strong>Python 3.x</strong> running on your computer. It <em>should</em> also work with <strong>Python 2.7.x</strong>
